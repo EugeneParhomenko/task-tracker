@@ -4,7 +4,7 @@ import type { Task, TaskPriority, TaskStatus } from '../types/task';
 const TASK_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done'];
 const TASK_PRIORITIES: TaskPriority[] = ['low', 'medium', 'high'];
 
-const TASKS_PER_PROJECT = 20;
+const TASKS_PER_PROJECT = 40;
 
 export const mockProjects: Project[] = [
   { id: 'p1', name: 'Веб-додаток' },
@@ -34,6 +34,24 @@ const PROJECT_TASK_TITLES: Record<string, string[]> = {
     'Документація для розробників',
     'Реліз у staging',
     'Фінальний QA',
+    'Канбан-дошка',
+    'Коментарі до задач',
+    'Історія змін',
+    'Експорт у CSV',
+    'Імпорт задач',
+    'Швидкий пошук (Cmd+K)',
+    'Гарячі клавіші',
+    'Сповіщення в браузері',
+    'Налаштування акаунта',
+    'Керування учасниками',
+    'Ролі та права',
+    'Аудит дій',
+    'Інтеграція зі Slack',
+    'Webhooks',
+    'Віджет вбудовування',
+    'SSO / SAML',
+    'Політика паролів',
+    'Оновлення UX-гайдів',
   ],
   p2: [
     'Splash screen',
@@ -56,6 +74,24 @@ const PROJECT_TASK_TITLES: Record<string, string[]> = {
     'Локалізація інтерфейсу',
     'Регресійне тестування',
     'Публікація в Store',
+    'Віджети (small/medium)',
+    'Face ID / Touch ID',
+    'Сканер QR-кодів',
+    'Голосові нотатки',
+    'Share extension',
+    'CarPlay підтримка',
+    'Apple Watch companion',
+    'In-app покупки',
+    'Відновлення пароля',
+    'Кеш зображень',
+    'Підтримка планшетів',
+    'Landscape layout',
+    'Haptic feedback',
+    'Review prompt у Store',
+    'Feature flags',
+    'Remote config',
+    'Перемикання середовищ',
+    'Оновлення мінімальної версії ОС',
   ],
   p3: [
     'CI/CD пайплайн',
@@ -78,6 +114,24 @@ const PROJECT_TASK_TITLES: Record<string, string[]> = {
     'Оновлення залежностей',
     'Кошторис і алокація',
     'Рев’ю SRE',
+    'Kubernetes namespace isolation',
+    'Helm charts',
+    'Argo CD sync',
+    'Vault інтеграція',
+    'Redis кеш-кластер',
+    'PostgreSQL реплікація',
+    'pgBouncer',
+    'Blue-green деплой',
+    'Canary releases',
+    'Feature branch прев’ю',
+    'Обмеження egress',
+    'mTLS між сервісами',
+    'Оновлення Terraform модулів',
+    'Cost anomaly алерти',
+    'On-call ротація',
+    'Postmortem шаблон',
+    'Chaos engineering тест',
+    'План оновлення ОС нод',
   ],
 };
 
@@ -89,6 +143,14 @@ function buildMockTasks(): Task[] {
 
     for (let n = 1; n <= TASKS_PER_PROJECT; n++) {
       const globalIndex = projectIndex * TASKS_PER_PROJECT + (n - 1);
+      const createdAt = new Date(
+        2025,
+        10,
+        1 + (globalIndex % 28),
+        9 + (globalIndex % 8),
+        0,
+        0,
+      ).getTime();
 
       tasks.push({
         id: `t${projectIndex + 1}-${n}`,
@@ -96,7 +158,7 @@ function buildMockTasks(): Task[] {
         title: titles[n - 1] ?? `Задача ${n}`,
         status: TASK_STATUSES[globalIndex % TASK_STATUSES.length],
         priority: TASK_PRIORITIES[globalIndex % TASK_PRIORITIES.length],
-        createdAt: new Date(2025, 10, 1 + (globalIndex % 28), 9 + (globalIndex % 8), 0, 0),
+        createdAt,
       });
     }
   });

@@ -4,7 +4,7 @@ export type Task = {
   title: string;
   status: TaskStatus;
   priority: TaskPriority;
-  createdAt: Date;
+  createdAt: number;
 };
 
 export type TaskStatus = 'todo' | 'in_progress' | 'done';

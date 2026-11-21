@@ -1,5 +1,6 @@
 import type { Project } from '../types/project';
 import type { Task, TaskStatus } from '../types/task';
+import { ApiError } from './apiError';
 import { delay } from './delay';
 import { mockProjects, mockTasks as seedTasks } from './mockData';
 
@@ -22,11 +23,10 @@ export type PaginatedTasks = {
 
 const tasks: Task[] = seedTasks.map((task) => ({
   ...task,
-  createdAt: new Date(task.createdAt),
 }));
 
 function cloneTask(task: Task): Task {
-  return { ...task, createdAt: new Date(task.createdAt) };
+  return { ...task };
 }
 
 function randomLatencyMs(): number {
@@ -39,7 +39,7 @@ async function withLatency(signal?: AbortSignal): Promise<void> {
 
 function assertMutationSuccess(): void {
   if (Math.random() < MUTATION_FAILURE_RATE) {
-    throw new Error('The operation failed. Please try again.');
+    throw new ApiError(500, 'Mutation failed. Please try again.');
   }
 }
 
@@ -55,7 +55,7 @@ export async function getProject(
   await withLatency(signal);
   const project = mockProjects.find((p) => p.id === id);
   if (!project) {
-    throw new Error('Not found');
+    throw new ApiError(404, 'Project not found');
   }
   return project;
 }
@@ -66,7 +66,7 @@ export async function getTasks(
 ): Promise<PaginatedTasks> {
   await withLatency(signal);
 
-  const page = params.page ?? 1;
+  const page = Math.max(1, Math.floor(params.page ?? 1));
   let filtered = tasks;
 
   if (params.projectId) {
@@ -96,7 +96,7 @@ export async function getTask(id: string, signal?: AbortSignal): Promise<Task> {
   await withLatency(signal);
   const task = tasks.find((t) => t.id === id);
   if (!task) {
-    throw new Error('Not found');
+    throw new ApiError(404, 'Task not found');
   }
   return cloneTask(task);
 }
@@ -111,7 +111,7 @@ export async function updateTaskStatus(
 
   const index = tasks.findIndex((t) => t.id === id);
   if (index === -1) {
-    throw new Error('Not found');
+    throw new ApiError(404, 'Task not found');
   }
 
   tasks[index] = { ...tasks[index], status };
@@ -127,7 +127,7 @@ export async function deleteTask(
 
   const index = tasks.findIndex((t) => t.id === id);
   if (index === -1) {
-    throw new Error('Not found');
+    throw new ApiError(404, 'Task not found');
   }
 
   tasks.splice(index, 1);
