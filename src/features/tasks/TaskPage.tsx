@@ -8,7 +8,9 @@ export default function TaskPage() {
   const {
     data: task,
     isLoading: taskIsLoading,
+    isFetching: taskIsFetching,
     error: taskError,
+    refetch: refetchTask,
   } = useQuery(taskDetailQuery(taskId ?? ''));
 
   const backProjectId = projectId ?? task?.projectId;
@@ -24,7 +26,13 @@ export default function TaskPage() {
           ← Back to projects
         </NavLink>
       )}
-      <TaskDetails task={task} isLoading={taskIsLoading} error={taskError} />
+      <TaskDetails
+        task={task}
+        isLoading={taskIsLoading}
+        error={taskError}
+        onRetry={refetchTask}
+        isRetrying={taskIsFetching && !taskIsLoading}
+      />
     </div>
   );
 }

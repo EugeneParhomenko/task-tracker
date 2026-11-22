@@ -1,15 +1,22 @@
 import type { PaginatedTasks } from '../../shared/api/mockApi';
 import type { TaskStatus } from '../../shared/types/task';
 
+const STATUS_OPTIONS = [
+  { label: 'All', value: '' },
+  { label: 'Todo', value: 'todo' },
+  { label: 'In Progress', value: 'in_progress' },
+  { label: 'Done', value: 'done' },
+] as const;
+
 type TasksFilterWrapperProps = {
   searchInput: string;
   page: number;
   status: TaskStatus | undefined;
   onSearchInputChange: (value: string) => void;
   onPageChange: (page: number) => void;
-  onStatusChange: (status: TaskStatus) => void;
+  onStatusChange: (status: TaskStatus | undefined) => void;
   paginatedTasks?: PaginatedTasks;
-  isRefetching: boolean;
+  isPlaceholderData: boolean;
   children: React.ReactNode;
 };
 
@@ -21,16 +28,9 @@ export default function TasksFilterWrapper({
   onPageChange,
   onStatusChange,
   paginatedTasks,
-  isRefetching,
+  isPlaceholderData,
   children,
 }: TasksFilterWrapperProps) {
-  const statusOptions = [
-    { label: 'All', value: '' },
-    { label: 'Todo', value: 'todo' },
-    { label: 'In Progress', value: 'in_progress' },
-    { label: 'Done', value: 'done' },
-  ];
-
   const pageCount = paginatedTasks?.pageCount ?? 0;
   const total = paginatedTasks?.total ?? 0;
 
@@ -66,10 +66,10 @@ export default function TasksFilterWrapper({
             value={status ?? ''}
             onChange={(e) => {
               const value = e.target.value;
-              onStatusChange(value as TaskStatus);
+              onStatusChange(value ? (value as TaskStatus) : undefined);
             }}
           >
-            {statusOptions.map((option) => (
+            {STATUS_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -84,7 +84,7 @@ export default function TasksFilterWrapper({
         <button
           type="button"
           className="tasks-pagination__btn"
-          disabled={page === 1 || !paginatedTasks || isRefetching}
+          disabled={page === 1 || !paginatedTasks || isPlaceholderData}
           onClick={() => onPageChange(page - 1)}
         >
           Previous
@@ -97,7 +97,9 @@ export default function TasksFilterWrapper({
           type="button"
           className="tasks-pagination__btn"
           disabled={
-            !paginatedTasks || paginatedTasks.pageCount <= page || isRefetching
+            !paginatedTasks ||
+            paginatedTasks.pageCount <= page ||
+            isPlaceholderData
           }
           onClick={() => onPageChange(page + 1)}
         >

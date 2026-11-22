@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import QueryErrorState from '../../shared/components/QueryErrorState';
 import type { Task, TaskPriority, TaskStatus } from '../../shared/types/task';
 
 type TasksListProps = {
@@ -6,10 +7,11 @@ type TasksListProps = {
   isPending: boolean;
   isRefetching: boolean;
   error: Error | null;
+  onRetry?: () => void;
+  isRetrying?: boolean;
 };
 
 const statusLabels: Record<TaskStatus, string> = {
-  '': 'All',
   todo: 'Todo',
   in_progress: 'In progress',
   done: 'Done',
@@ -26,6 +28,8 @@ export default function TasksList({
   isPending,
   isRefetching,
   error,
+  onRetry,
+  isRetrying,
 }: TasksListProps) {
   if (isPending && !tasks?.length) {
     return <div className="tasks-state">Loading tasks…</div>;
@@ -33,7 +37,13 @@ export default function TasksList({
 
   if (error && !tasks?.length) {
     return (
-      <div className="tasks-state tasks-state--error">{error.message}</div>
+      <QueryErrorState
+        className="tasks-state tasks-state--error query-error"
+        error={error}
+        notFoundMessage="Tasks not found"
+        onRetry={onRetry}
+        isRetrying={isRetrying}
+      />
     );
   }
 

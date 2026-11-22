@@ -1,9 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
+import QueryErrorState from '../../shared/components/QueryErrorState';
 import { projectsListQuery } from './queries';
 
 export default function ProjectsPage() {
-  const { data: projects, isLoading, error } = useQuery(projectsListQuery());
+  const {
+    data: projects,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useQuery(projectsListQuery());
 
   if (isLoading) {
     return (
@@ -16,9 +23,13 @@ export default function ProjectsPage() {
   if (error) {
     return (
       <div className="projects-page">
-        <div className="projects-state projects-state--error">
-          Error: {error.message}
-        </div>
+        <QueryErrorState
+          className="projects-state projects-state--error query-error"
+          error={error}
+          notFoundMessage="Projects not found"
+          onRetry={refetch}
+          isRetrying={isFetching && !isLoading}
+        />
       </div>
     );
   }

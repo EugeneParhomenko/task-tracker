@@ -1,11 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { NavLink, useParams } from 'react-router';
+import { tasksListsQuery, type TaskListFilters } from '../tasks/queries';
 import ProjectDetails from './ProjectDetails';
-import {
-  projectDetailQuery,
-  tasksListsQuery,
-  type TaskListFilters,
-} from './queries';
+import { projectDetailQuery } from './queries';
 import TasksFilterWrapper from './TasksFilterWrapper';
 import TasksList from './TasksList';
 import { useProjectTaskFilters } from './useProjectTaskFilters';
@@ -15,12 +12,14 @@ export default function ProjectPage() {
   const {
     data: project,
     isLoading: projectIsLoading,
+    isFetching: projectIsFetching,
     error: projectError,
+    refetch: refetchProject,
   } = useQuery(projectDetailQuery(projectId ?? ''));
 
   const {
     searchInput,
-    debouncedSearch,
+    q,
     page,
     status,
     handleSearchInputChange,
@@ -30,7 +29,7 @@ export default function ProjectPage() {
 
   const filters: TaskListFilters = {
     projectId: projectId ?? '',
-    q: debouncedSearch,
+    q,
     page,
     status,
   };
@@ -38,7 +37,9 @@ export default function ProjectPage() {
     data: paginatedTasks,
     isPending: tasksIsPending,
     isFetching: tasksIsFetching,
+    isPlaceholderData: tasksIsPlaceholderData,
     error: tasksError,
+    refetch: refetchTasks,
   } = useQuery(tasksListsQuery(filters));
 
   return (
@@ -50,6 +51,8 @@ export default function ProjectPage() {
         project={project}
         isLoading={projectIsLoading}
         error={projectError}
+        onRetry={refetchProject}
+        isRetrying={projectIsFetching && !projectIsLoading}
       />
       {project && (
         <TasksFilterWrapper
@@ -60,13 +63,17 @@ export default function ProjectPage() {
           onPageChange={handlePageChange}
           onStatusChange={handleStatusChange}
           paginatedTasks={paginatedTasks}
-          isRefetching={tasksIsFetching && !tasksIsPending}
+          isPlaceholderData={tasksIsPlaceholderData}
         >
           <TasksList
             tasks={paginatedTasks?.items}
             isPending={tasksIsPending}
             isRefetching={tasksIsFetching && !tasksIsPending}
             error={tasksError}
+            onRetry={() => {
+              void refetchTasks();
+            }}
+            isRetrying={tasksIsFetching && !tasksIsPending}
           />
         </TasksFilterWrapper>
       )}

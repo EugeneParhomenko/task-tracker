@@ -99,7 +99,7 @@ export function useProjectTaskFilters() {
 
   return {
     searchInput,
-    debouncedSearch,
+    q: qFromUrl,
     page,
     status,
     handleSearchInputChange,
