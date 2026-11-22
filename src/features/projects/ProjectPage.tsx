@@ -51,7 +51,7 @@ export default function ProjectPage() {
         project={project}
         isLoading={projectIsLoading}
         error={projectError}
-        onRetry={refetchProject}
+        onRetry={() => refetchProject()}
         isRetrying={projectIsFetching && !projectIsLoading}
       />
       {project && (
@@ -66,13 +66,12 @@ export default function ProjectPage() {
           isPlaceholderData={tasksIsPlaceholderData}
         >
           <TasksList
+            listFilters={filters}
             tasks={paginatedTasks?.items}
             isPending={tasksIsPending}
             isRefetching={tasksIsFetching && !tasksIsPending}
             error={tasksError}
-            onRetry={() => {
-              void refetchTasks();
-            }}
+            onRetry={() => refetchTasks()}
             isRetrying={tasksIsFetching && !tasksIsPending}
           />
         </TasksFilterWrapper>

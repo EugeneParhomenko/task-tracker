@@ -45,7 +45,7 @@ export default function TaskDetails({
           className="task-details__state task-details__state--error query-error"
           error={error}
           notFoundMessage="Task not found"
-          onRetry={onRetry}
+          onRetry={() => onRetry?.()}
           isRetrying={isRetrying}
         />
       ) : task ? (

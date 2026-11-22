@@ -25,7 +25,7 @@ export default function ProjectDetails({
           className="project-details__state project-details__state--error query-error"
           error={error}
           notFoundMessage="Project not found"
-          onRetry={onRetry}
+          onRetry={() => onRetry?.()}
           isRetrying={isRetrying}
         />
       ) : (

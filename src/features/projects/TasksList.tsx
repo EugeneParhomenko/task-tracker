@@ -1,20 +1,20 @@
 import { Link } from 'react-router';
 import QueryErrorState from '../../shared/components/QueryErrorState';
-import type { Task, TaskPriority, TaskStatus } from '../../shared/types/task';
+import type { Task, TaskPriority } from '../../shared/types/task';
+import type { TaskListFilters } from '../tasks/queries';
+import { useDeleteTaskMutation } from '../tasks/useDeleteTaskMutation';
+import { useUpdateTaskStatusMutation } from '../tasks/useUpdateTaskStatusMutation';
+import TaskDeleteButton from './TaskDeleteButton';
+import TaskStatusSelector from './TaskStatusSelector';
 
 type TasksListProps = {
+  listFilters: TaskListFilters;
   tasks?: Task[];
   isPending: boolean;
   isRefetching: boolean;
   error: Error | null;
   onRetry?: () => void;
   isRetrying?: boolean;
-};
-
-const statusLabels: Record<TaskStatus, string> = {
-  todo: 'Todo',
-  in_progress: 'In progress',
-  done: 'Done',
 };
 
 const priorityLabels: Record<TaskPriority, string> = {
@@ -24,6 +24,7 @@ const priorityLabels: Record<TaskPriority, string> = {
 };
 
 export default function TasksList({
+  listFilters,
   tasks,
   isPending,
   isRefetching,
@@ -31,6 +32,9 @@ export default function TasksList({
   onRetry,
   isRetrying,
 }: TasksListProps) {
+  const updateStatus = useUpdateTaskStatusMutation(listFilters);
+  const deleteTask = useDeleteTaskMutation();
+
   if (isPending && !tasks?.length) {
     return <div className="tasks-state">Loading tasks…</div>;
   }
@@ -41,7 +45,7 @@ export default function TasksList({
         className="tasks-state tasks-state--error query-error"
         error={error}
         notFoundMessage="Tasks not found"
-        onRetry={onRetry}
+        onRetry={() => onRetry?.()}
         isRetrying={isRetrying}
       />
     );
@@ -62,29 +66,62 @@ export default function TasksList({
           isRefetching ? 'tasks-list tasks-list--behind-overlay' : 'tasks-list'
         }
       >
-        {tasks.map((task) => (
-          <li key={task.id} className="tasks-list__item">
-            <Link
-              className="tasks-list__link"
-              to={`/projects/${task.projectId}/tasks/${task.id}`}
+        {tasks.map((task) => {
+          const isUpdating =
+            updateStatus.isPending && updateStatus.variables?.id === task.id;
+          const isDeleting =
+            deleteTask.isPending && deleteTask.variables === task.id;
+          const isRowBusy = isUpdating || isDeleting;
+
+          return (
+            <li
+              key={task.id}
+              className={
+                isRowBusy
+                  ? 'tasks-list__item tasks-list__item--busy'
+                  : 'tasks-list__item'
+              }
+              aria-busy={isRowBusy}
             >
-              <span className="tasks-list__title">{task.title}</span>
-              <span className="tasks-list__badges">
-                <span
-                  className={`task-badge task-badge--status task-badge--${task.status}`}
+              <div className="tasks-list__row">
+                <Link
+                  className="tasks-list__title-link"
+                  to={`/projects/${task.projectId}/tasks/${task.id}`}
+                  tabIndex={isRowBusy ? -1 : undefined}
+                  aria-disabled={isRowBusy}
+                  onClick={(event) => {
+                    if (isRowBusy) event.preventDefault();
+                  }}
                 >
-                  {statusLabels[task.status]}
-                </span>
-                <span
-                  className={`task-badge task-badge--priority task-badge--priority-${task.priority}`}
-                >
-                  {priorityLabels[task.priority]}
-                </span>
-                <span className="task-badge task-badge--id">{task.id}</span>
-              </span>
-            </Link>
-          </li>
-        ))}
+                  {task.title}
+                </Link>
+                <div className="tasks-list__actions">
+                  <div className="tasks-list__badges">
+                    <TaskStatusSelector
+                      status={task.status}
+                      disabled={isRowBusy}
+                      onStatusChange={(status) =>
+                        updateStatus.mutate({ id: task.id, status })
+                      }
+                    />
+                    <span
+                      className={`task-badge task-badge--priority task-badge--priority-${task.priority}`}
+                    >
+                      {priorityLabels[task.priority]}
+                    </span>
+                    <span className="task-badge task-badge--id">{task.id}</span>
+                  </div>
+                  <TaskDeleteButton
+                    taskTitle={task.title}
+                    disabled={isRowBusy}
+                    isDeleting={isDeleting}
+                    onConfirmDelete={() => deleteTask.mutate(task.id)}
+                  />
+                </div>
+              </div>
+            </li>
+          );
+        })}
       </ul>
       {isRefetching ? (
         <div className="tasks-list-overlay" role="status">

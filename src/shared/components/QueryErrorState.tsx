@@ -26,7 +26,7 @@ export default function QueryErrorState({
         <button
           type="button"
           className="query-error__retry"
-          onClick={onRetry}
+          onClick={() => onRetry?.()}
           disabled={isRetrying}
         >
           {isRetrying ? 'Loading...' : 'Try again'}

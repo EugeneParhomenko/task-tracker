@@ -8,21 +8,22 @@ import {
 export type TaskListFilters = GetTasksParams;
 
 export const taskKeys = {
-  tasks: ['tasks'] as const,
-  tasksList: (filters: TaskListFilters) => [...taskKeys.tasks, filters],
-  taskDetails: (id: string) => [...taskKeys.tasks, 'detail', id],
+  all: ['tasks'] as const,
+  lists: () => [...taskKeys.all, 'list'] as const,
+  list: (filters: TaskListFilters) => [...taskKeys.lists(), filters] as const,
+  detail: (id: string) => [...taskKeys.all, 'detail', id] as const,
 };
 
 export const taskDetailQuery = (id: string) =>
   queryOptions({
-    queryKey: taskKeys.taskDetails(id),
+    queryKey: taskKeys.detail(id),
     queryFn: ({ signal }) => getTask(id, signal),
     enabled: Boolean(id),
   });
 
 export const tasksListsQuery = (filters: TaskListFilters) =>
   queryOptions({
-    queryKey: taskKeys.tasksList(filters),
+    queryKey: taskKeys.list(filters),
     queryFn: ({ signal }) => getTasks(filters, signal),
     placeholderData: keepPreviousData,
     enabled: Boolean(filters.projectId),
