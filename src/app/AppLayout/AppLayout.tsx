@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router';
-import { useAuthStore } from '../features/auth/useAuthStore';
+import { useAuthStore } from '../../features/auth/useAuthStore';
 import './AppLayout.css';
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
@@ -29,7 +29,11 @@ export default function AppLayout() {
         </nav>
         <div className="app-user">
           {user ? <span className="app-user__name">{user.name}</span> : null}
-          <button type="button" className="app-user__logout" onClick={handleLogout}>
+          <button
+            type="button"
+            className="app-user__logout"
+            onClick={handleLogout}
+          >
             Logout
           </button>
         </div>

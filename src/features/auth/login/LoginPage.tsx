@@ -1,27 +1,37 @@
-import { useState } from "react";
-import { useAuthStore } from "../useAuthStore";
-import { useRedirectStore } from "../redirectStore";
-import { useNavigate } from "react-router";
+import { type FormEvent, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
+import { useAuthStore } from '../useAuthStore';
 
 export default function LoginPage() {
-  const [userName, setUserName] = useState("");
-  const authStore = useAuthStore();
-  const redirectStore = useRedirectStore();
+  const [userName, setUserName] = useState('');
+  const login = useAuthStore((s) => s.login);
   const navigate = useNavigate();
-  
-  const handleLogin = () => {
-    authStore.login(userName);
-    const redirectTo = redirectStore.redirectTo;
-    redirectStore.clearRedirectTo();
-    if (redirectTo) {
-      navigate(redirectTo);
-    } else {
-      navigate("/");
-    }
-    
+  const [searchParams] = useSearchParams();
+
+  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const name = userName.trim();
+    if (!name) return;
+
+    login(name);
+
+    const raw = searchParams.get('redirectTo');
+    const redirectTo =
+      raw?.startsWith('/') && !raw.startsWith('//') ? raw : '/';
+    navigate(redirectTo, { replace: true });
   };
-  return (<>
-    <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)} />
-    <button onClick={handleLogin}>Login</button>
-  </>);
+  return (
+    <>
+      <form onSubmit={handleLogin}>
+        <input
+          type="text"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          required
+        />
+        <button type="submit">Login</button>
+      </form>
+    </>
+  );
 }

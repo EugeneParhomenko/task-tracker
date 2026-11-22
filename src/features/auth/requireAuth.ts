@@ -1,13 +1,11 @@
-import { redirect, type LoaderFunctionArgs } from "react-router";
-import { useAuthStore } from "./useAuthStore";
-import { useRedirectStore } from "./redirectStore";
+import { redirect, type LoaderFunctionArgs } from 'react-router';
+import { useAuthStore } from './useAuthStore';
 
 export default function requireAuth({ url }: LoaderFunctionArgs) {
   const user = useAuthStore.getState().user;
-  const redirectStore = useRedirectStore.getState();
   if (!user) {
-    redirectStore.setRedirectTo(url.pathname);
-    return redirect("/login");
+    const target = url.pathname + url.search;
+    throw redirect(`/login?redirectTo=${encodeURIComponent(target)}`);
   }
   return null;
 }

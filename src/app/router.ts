@@ -1,49 +1,31 @@
 import { createBrowserRouter, type RouteObject } from 'react-router';
-import AppLayout from './AppLayout';
-import NotFoundPage from './NotFoundPage/NotFoundPage';
-import RootErrorBoundary from './RootErrorBoundary';
-import Dashboard from '../features/dashboard/Dashboard';
 import LoginPage from '../features/auth/login/LoginPage';
 import requireAuth from '../features/auth/requireAuth';
-import ProjectsPage from '../features/projects/ProjectsPage/ProjectsPage';
+import Dashboard from '../features/dashboard/Dashboard';
 import ProjectPage from '../features/projects/ProjectPage/ProjectPage';
-
-const taskRoutes: RouteObject = {
-  path: "tasks",
-  lazy: async () => {
-    const { default: TasksPage } = await import("../features/tasks/TasksPage/TasksPage");
-    return {
-      Component: TasksPage,
-    };
-  },
-  children: [
-    {
-      path: ":taskId",
-      lazy: async () => {
-        const { default: TaskPage } = await import("../features/tasks/TaskPage/TaskPage");
-        return {
-          Component: TaskPage,
-        };
-      },
-    },
-  ],
-}
+import ProjectsPage from '../features/projects/ProjectsPage/ProjectsPage';
+import AppLayout from './AppLayout/AppLayout';
+import NotFoundPage from './NotFoundPage/NotFoundPage';
+import RootErrorBoundary from './RootErrorBoundary/RootErrorBoundary';
 
 const projectRoutes: RouteObject = {
-  path: "projects",
-  Component: ProjectsPage,
+  path: 'projects',
   children: [
+    { index: true, Component: ProjectsPage },
+    { path: ':projectId', Component: ProjectPage },
     {
-      path: ":projectId",
-      Component: ProjectPage,
+      path: ':projectId/tasks/:taskId',
+      lazy: async () => ({
+        Component: (await import('../features/tasks/TaskPage/TaskPage'))
+          .default,
+      }),
     },
-    taskRoutes,
   ],
-}
+};
 
 const router = createBrowserRouter([
   {
-    path: "/login",
+    path: '/login',
     Component: LoginPage,
   },
   {
@@ -57,11 +39,11 @@ const router = createBrowserRouter([
         Component: Dashboard,
       },
       projectRoutes,
+      {
+        path: '*',
+        Component: NotFoundPage,
+      },
     ],
-  },
-  {
-    path: "*",
-    Component: NotFoundPage,
   },
 ]);
 
