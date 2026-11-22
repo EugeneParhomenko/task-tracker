@@ -6,7 +6,7 @@ export function useDeleteTaskMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteTask(id),
-    onMutate: async (id) => {
+    onSuccess: async (_data, id) => {
       if (id) {
         queryClient.removeQueries({ queryKey: taskKeys.detail(id) });
       }

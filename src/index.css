@@ -36,23 +36,48 @@ input {
   font: inherit;
 }
 
-/* ——— App shell & navbar ——— */
+/* ——— App shell, sidebar & top bar ——— */
 
 .app-shell {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  background: var(--bg);
 }
 
-.app-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem 1.5rem;
-  padding: 0.875rem clamp(1rem, 3vw, 2rem);
+.app-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  padding: 0;
+  border: none;
+  background: rgb(15 23 42 / 0.35);
+  cursor: pointer;
+}
+
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: min(16.5rem, 88vw);
+  height: 100vh;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  border-right: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  transform: translateX(-105%);
+  transition: transform 0.22s ease;
+}
+
+.app-sidebar--open {
+  transform: translateX(0);
+}
+
+.app-sidebar__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  height: 100%;
+  padding: 1.25rem 1rem;
 }
 
 .app-brand {
@@ -65,13 +90,14 @@ input {
 
 .app-nav {
   display: flex;
+  flex-direction: column;
   gap: 0.35rem;
   flex: 1;
 }
 
 .app-nav__link {
-  padding: 0.45rem 0.85rem;
-  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.5rem;
   color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
@@ -94,23 +120,26 @@ input {
 
 .app-user {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
+  padding-top: 0.75rem;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
 }
 
 .app-user__name {
   font-size: 0.875rem;
   color: var(--text-muted);
-  max-width: 12rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .app-user__logout {
-  padding: 0.4rem 0.85rem;
+  padding: 0.45rem 0.85rem;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 0.5rem;
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
@@ -126,11 +155,84 @@ input {
   border-color: #cbd5e1;
 }
 
+.app-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+.app-topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem clamp(1rem, 3vw, 2rem);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-sidebar-toggle {
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.app-sidebar-toggle:hover {
+  background: var(--bg);
+  border-color: #cbd5e1;
+}
+
+.app-sidebar-toggle:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
 .app-main {
   flex: 1;
   width: min(1100px, 100%);
   margin: 0 auto;
   padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+@media (min-width: 900px) {
+  .app-sidebar-backdrop {
+    display: none;
+  }
+
+  .app-sidebar {
+    position: sticky;
+    flex-shrink: 0;
+    height: 100vh;
+    transform: translateX(0);
+    box-shadow: none;
+  }
+
+  .app-shell:not(.app-shell--sidebar-open) .app-sidebar {
+    width: 0;
+    padding: 0;
+    border-right: none;
+    overflow: hidden;
+    transform: none;
+  }
+
+  .app-shell:not(.app-shell--sidebar-open) .app-sidebar__inner {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .app-shell--sidebar-open .app-sidebar {
+    width: min(16.5rem, 88vw);
+  }
 }
 
 /* ——— Login ——— */
