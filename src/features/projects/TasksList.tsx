@@ -1,14 +1,8 @@
-import { Link } from 'react-router';
 import QueryErrorState from '../../shared/components/QueryErrorState';
-import type { Task, TaskPriority } from '../../shared/types/task';
-import type { TaskListFilters } from '../tasks/queries';
-import { useDeleteTaskMutation } from '../tasks/useDeleteTaskMutation';
-import { useUpdateTaskStatusMutation } from '../tasks/useUpdateTaskStatusMutation';
-import TaskDeleteButton from './TaskDeleteButton';
-import TaskStatusSelector from './TaskStatusSelector';
+import type { Task } from '../../shared/types/task';
+import TaskRow from './TaskRow';
 
 type TasksListProps = {
-  listFilters: TaskListFilters;
   tasks?: Task[];
   isPending: boolean;
   isRefetching: boolean;
@@ -17,14 +11,7 @@ type TasksListProps = {
   isRetrying?: boolean;
 };
 
-const priorityLabels: Record<TaskPriority, string> = {
-  low: 'Low',
-  medium: 'Medium',
-  high: 'High',
-};
-
 export default function TasksList({
-  listFilters,
   tasks,
   isPending,
   isRefetching,
@@ -32,9 +19,6 @@ export default function TasksList({
   onRetry,
   isRetrying,
 }: TasksListProps) {
-  const updateStatus = useUpdateTaskStatusMutation(listFilters);
-  const deleteTask = useDeleteTaskMutation();
-
   if (isPending && !tasks?.length) {
     return <div className="tasks-state">Loading tasks…</div>;
   }
@@ -66,62 +50,9 @@ export default function TasksList({
           isRefetching ? 'tasks-list tasks-list--behind-overlay' : 'tasks-list'
         }
       >
-        {tasks.map((task) => {
-          const isUpdating =
-            updateStatus.isPending && updateStatus.variables?.id === task.id;
-          const isDeleting =
-            deleteTask.isPending && deleteTask.variables === task.id;
-          const isRowBusy = isUpdating || isDeleting;
-
-          return (
-            <li
-              key={task.id}
-              className={
-                isRowBusy
-                  ? 'tasks-list__item tasks-list__item--busy'
-                  : 'tasks-list__item'
-              }
-              aria-busy={isRowBusy}
-            >
-              <div className="tasks-list__row">
-                <Link
-                  className="tasks-list__title-link"
-                  to={`/projects/${task.projectId}/tasks/${task.id}`}
-                  tabIndex={isRowBusy ? -1 : undefined}
-                  aria-disabled={isRowBusy}
-                  onClick={(event) => {
-                    if (isRowBusy) event.preventDefault();
-                  }}
-                >
-                  {task.title}
-                </Link>
-                <div className="tasks-list__actions">
-                  <div className="tasks-list__badges">
-                    <TaskStatusSelector
-                      status={task.status}
-                      disabled={isRowBusy}
-                      onStatusChange={(status) =>
-                        updateStatus.mutate({ id: task.id, status })
-                      }
-                    />
-                    <span
-                      className={`task-badge task-badge--priority task-badge--priority-${task.priority}`}
-                    >
-                      {priorityLabels[task.priority]}
-                    </span>
-                    <span className="task-badge task-badge--id">{task.id}</span>
-                  </div>
-                  <TaskDeleteButton
-                    taskTitle={task.title}
-                    disabled={isRowBusy}
-                    isDeleting={isDeleting}
-                    onConfirmDelete={() => deleteTask.mutate(task.id)}
-                  />
-                </div>
-              </div>
-            </li>
-          );
-        })}
+        {tasks.map((task) => (
+          <TaskRow key={task.id} task={task} />
+        ))}
       </ul>
       {isRefetching ? (
         <div className="tasks-list-overlay" role="status">

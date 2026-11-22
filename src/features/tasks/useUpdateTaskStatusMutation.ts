@@ -1,9 +1,8 @@
-import { useMutation } from '@tanstack/react-query';
-import { queryClient } from '../../app/queryClient';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { PaginatedTasks } from '../../shared/api/mockApi';
 import { updateTaskStatus } from '../../shared/api/mockApi';
 import type { Task, TaskStatus } from '../../shared/types/task';
-import { taskKeys, type TaskListFilters } from './queries';
+import { taskKeys } from './queries';
 
 type MutationContext = {
   previousLists: [readonly unknown[], PaginatedTasks | undefined][];
@@ -11,28 +10,9 @@ type MutationContext = {
   taskId: string;
 };
 
-function applyStatusToLists(
-  id: string,
-  status: TaskStatus,
-  listFilters: TaskListFilters,
-) {
-  queryClient.setQueriesData<PaginatedTasks>(
-    { queryKey: taskKeys.lists() },
-    (old) => {
-      if (!old) return old;
+export function useUpdateTaskStatusMutation() {
+  const queryClient = useQueryClient();
 
-      const items = old.items
-        .map((task) => (task.id === id ? { ...task, status } : task))
-        .filter(
-          (task) => !listFilters.status || task.status === listFilters.status,
-        );
-
-      return { ...old, items };
-    },
-  );
-}
-
-export function useUpdateTaskStatusMutation(listFilters: TaskListFilters) {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: TaskStatus }) =>
       updateTaskStatus(id, status),
@@ -47,7 +27,18 @@ export function useUpdateTaskStatusMutation(listFilters: TaskListFilters) {
         taskKeys.detail(id),
       );
 
-      applyStatusToLists(id, status, listFilters);
+      queryClient.setQueriesData<PaginatedTasks>(
+        { queryKey: taskKeys.lists() },
+        (old) =>
+          old
+            ? {
+                ...old,
+                items: old.items.map((t) =>
+                  t.id === id ? { ...t, status } : t,
+                ),
+              }
+            : old,
+      );
 
       queryClient.setQueryData<Task>(taskKeys.detail(id), (old) =>
         old ? { ...old, status } : old,
@@ -72,11 +63,13 @@ export function useUpdateTaskStatusMutation(listFilters: TaskListFilters) {
       );
     },
     onSettled: (_data, _error, variables) => {
-      void queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
-      if (variables?.id) {
-        void queryClient.invalidateQueries({
-          queryKey: taskKeys.detail(variables.id),
-        });
+      if (queryClient.isMutating() === 1) {
+        void queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
+        if (variables?.id) {
+          void queryClient.invalidateQueries({
+            queryKey: taskKeys.detail(variables.id),
+          });
+        }
       }
     },
   });

@@ -26,10 +26,7 @@ export default function TaskDeleteButton({
       disabled={disabled}
       aria-busy={isDeleting}
       aria-label={isDeleting ? `Deleting ${taskTitle}` : `Delete ${taskTitle}`}
-      onClick={(event) => {
-        event.stopPropagation();
-        handleClick();
-      }}
+      onClick={handleClick}
     >
       {isDeleting ? (
         <>

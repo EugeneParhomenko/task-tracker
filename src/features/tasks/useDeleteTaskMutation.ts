@@ -1,15 +1,19 @@
-import { useMutation } from '@tanstack/react-query';
-import { queryClient } from '../../app/queryClient';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteTask } from '../../shared/api/mockApi';
 import { taskKeys } from './queries';
 
 export function useDeleteTaskMutation() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteTask(id),
-    onSettled: (_data, _error, id) => {
-      void queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
+    onMutate: async (id) => {
       if (id) {
         queryClient.removeQueries({ queryKey: taskKeys.detail(id) });
+      }
+    },
+    onSettled: () => {
+      if (queryClient.isMutating() === 1) {
+        queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
       }
     },
   });

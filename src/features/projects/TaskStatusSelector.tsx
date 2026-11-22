@@ -30,8 +30,6 @@ export default function TaskStatusSelector({
         aria-labelledby={labelId}
         value={status}
         disabled={disabled}
-        onMouseDown={(event) => event.stopPropagation()}
-        onClick={(event) => event.stopPropagation()}
         onChange={(event) => onStatusChange(event.target.value as TaskStatus)}
       >
         {STATUS_OPTIONS.map((option) => (

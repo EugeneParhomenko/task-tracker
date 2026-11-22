@@ -608,6 +608,22 @@ input {
   animation: task-delete-spin 0.65s linear infinite;
 }
 
+.task-mutation-control {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  max-width: min(100%, 14rem);
+}
+
+.task-row-error {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--danger);
+}
+
 @keyframes task-delete-spin {
   to {
     transform: rotate(360deg);

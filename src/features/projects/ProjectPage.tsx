@@ -66,7 +66,6 @@ export default function ProjectPage() {
           isPlaceholderData={tasksIsPlaceholderData}
         >
           <TasksList
-            listFilters={filters}
             tasks={paginatedTasks?.items}
             isPending={tasksIsPending}
             isRefetching={tasksIsFetching && !tasksIsPending}
