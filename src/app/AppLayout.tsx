@@ -1,6 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router';
-import { useAuthStore } from '../../features/auth/useAuthStore';
-import './AppLayout.css';
+import { useAuthStore } from '../features/auth/useAuthStore';
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'app-nav__link app-nav__link--active' : 'app-nav__link';

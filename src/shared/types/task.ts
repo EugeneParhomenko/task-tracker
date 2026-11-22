@@ -7,6 +7,6 @@ export type Task = {
   createdAt: number;
 };
 
-export type TaskStatus = 'todo' | 'in_progress' | 'done';
+export type TaskStatus = '' | 'todo' | 'in_progress' | 'done';
 
 export type TaskPriority = 'low' | 'medium' | 'high';
